@@ -10,69 +10,62 @@ class Song
     self.class.all << self
   end
 
-  def initialize(name = nil, artist_name = nil)
-    @name = name
-    @artist_name = artist_name
+  def self.create #class constructor
+    song = self.new
+    self.all << song
+    song
   end
 
-  def self.create
-    new_song = self.new
-    new_song.save
-    new_song 
+  def self.new_by_name(title) #class constructor
+    song = self.new
+    song.name = title
+    song
   end
 
-  def self.new_by_name(name)
-    str = self.new(name)
-    str
+  def self.create_by_name(title) #class constructor
+    song = self.create
+    song.name = title
+    song
   end
 
-  def self.create_by_name(name)
-    the_song = self.new(name)
-    the_song.save
-    the_song
+  def self.find_by_name(title) #class finder
+    result = self.all.detect {|song| song.name == title}
+    result
   end
 
-  def self.find_by_name(name)
-    @@all.detect {|song| song.name == name}
-  end
-
-  def self.find_or_create_by_name(name)
-    if self.find_by_name(name)
-      self.find_by_name(name)
+  def self.find_or_create_by_name(title)
+    #either return a matching song instance with that name or create a new song with the name and return the song instance
+    result = self.find_by_name(title)
+    if result
+      result
     else
-      self.new(name)
+      self.create_by_name(title)
     end
   end
 
   def self.alphabetical
-    sorted = @@all.sort_by do |item|
-        item.name
-    end
-      sorted
+    sorted = self.all.sort_by {|song| song.name}
+    sorted
   end
 
-  def self.new_from_filename(string)
-   new_arr = string.split(/[\-.]/)
-   new_arr.take(2)
-   song = self.new
-   song.name = new_arr[1].lstrip
-   song.artist_name = new_arr[0].rstrip
-   song.save
-   song
- end
-
-  def self.create_from_filename(name)
-    new_arr = name.split(/[\-.]/)
-    new_arr.take(2)
+  def self.new_from_filename(filename)
+    song_array = filename.split(" - ")
+    song_array[1] = song_array[1].chomp(".mp3")
     song = self.new
-    song.name = new_arr[1].lstrip
-    song.artist_name = new_arr[0].rstrip
-    song.save
+    song.name = song_array[1]
+    song.artist_name = song_array[0]
+    song
+  end
+
+  def self.create_from_filename(filename)
+    result = self.new_from_filename(filename)
+    song = self.create
+    song.name = result.name
+    song.artist_name = result.artist_name
     song
   end
 
   def self.destroy_all
-    @@all.clear
+    self.all.clear
   end
-
 end
